@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+option go_package = "github.com/jairoprogramador/fastdeploy-auth/internal/fdplugin";
+
+package fdplugin;
+
+// Configuración que el core envía al plugin
+message AuthConfig {
+  string client_id = 1;
+  string client_secret = 2;
+  string scope = 3;
+  map<string, string> extra = 4;
+}
+
+// Estructura del token que el plugin devuelve
+message AuthToken {
+  string access_token = 1;
+  string refresh_token = 2;
+  string token_type = 3;
+  int64 expires_at_unix = 4;
+  map<string, string> metadata = 5;
+}
+
+// Requests / Responses
+message AuthenticateRequest {
+  AuthConfig config = 1;
+}
+
+message AuthenticateResponse {
+  AuthToken token = 1;
+}
+
+message ValidateRequest {
+  AuthToken token = 1;
+}
+
+message ValidateResponse {
+  bool valid = 1;
+  string reason = 2;
+}
+
+message RefreshRequest {
+  AuthToken token = 1;
+  AuthConfig config = 2;
+}
+
+message RefreshResponse {
+  AuthToken new_token = 1;
+}
+
+// Servicio principal
+service AuthService {
+  rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse);
+  rpc Validate(ValidateRequest) returns (ValidateResponse);
+  rpc Refresh(RefreshRequest) returns (RefreshResponse);
+}
