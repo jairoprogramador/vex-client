@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"runtime"
 	"strings"
@@ -52,8 +51,8 @@ func (s *OrderService) ExecuteOrder(ctx context.Context, order, env string, with
 		return err
 	}
 	if !exists {
-		s.logMessage.Error(MessageProjectNotInitialized)
-		return errors.New(MessageProjectNotInitialized)
+		s.logMessage.Info(MessageProjectNotInitialized)
+		return nil
 	}
 
 	if err := s.dockerService.Check(ctx); err != nil {
