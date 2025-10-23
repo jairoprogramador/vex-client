@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"os/exec"
 	"runtime"
+	"time"
 
+	"github.com/briandowns/spinner"
 	"github.com/jairoprogramador/fastdeploy/internal/application/ports"
 )
 
@@ -26,6 +28,10 @@ func NewShellExecutor(logger ports.LogMessage) CommandExecutor {
 
 func (e *ShellExecutor) Execute(ctx context.Context, command string, workDir string) error {
 	e.logger.Detail(fmt.Sprintf("Executing command: %s", command))
+
+	s := spinner.New(spinner.CharSets[26], 100*time.Millisecond)
+	s.Start()
+	defer s.Stop()
 
 	var cmd *exec.Cmd
 	if runtime.GOOS == "linux" {
