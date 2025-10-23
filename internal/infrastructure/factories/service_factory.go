@@ -2,6 +2,7 @@ package factories
 
 import (
 	"os"
+	"path/filepath"
 	"io"
 
 	appPor "github.com/jairoprogramador/fastdeploy/internal/application/ports"
@@ -50,7 +51,7 @@ func (f *serviceFactory) BuildInitService(logFile io.WriteCloser) (*applic.InitS
 
 	appLogger := logger.NewLoggerService(os.Stdout, logFile, false)
 	inputService := project.NewSurveyUserInputService()
-	return applic.NewInitService(workDir, projectRepository, inputService, appLogger), nil
+	return applic.NewInitService(filepath.Base(workDir), projectRepository, inputService, appLogger), nil
 }
 
 func (f *serviceFactory) BuildOrderService(logFile io.WriteCloser) (*applic.OrderService, error) {

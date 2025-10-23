@@ -4,6 +4,7 @@ go 1.25.1
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
+	github.com/briandowns/spinner v1.23.2
 	github.com/fatih/color v1.18.0
 	github.com/mattn/go-isatty v0.0.20
 	github.com/spf13/cobra v1.10.1
@@ -12,7 +13,6 @@ require (
 )
 
 require (
-	github.com/briandowns/spinner v1.23.2 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
