@@ -2,58 +2,68 @@ package application
 
 import (
 	"context"
-	"fmt"
 
 	proPor "github.com/jairoprogramador/fastdeploy/internal/domain/project/ports"
 	proSer "github.com/jairoprogramador/fastdeploy/internal/domain/project/services"
 	proVos "github.com/jairoprogramador/fastdeploy/internal/domain/project/vos"
+	logAgg "github.com/jairoprogramador/fastdeploy/internal/domain/logger/aggregates"
 
 	appPor "github.com/jairoprogramador/fastdeploy/internal/application/ports"
 )
 
 const MessageProjectAlreadyExists = "project already initialized, fdconfig.yaml exists"
 
-type InitService struct {
+type InitializeService struct {
 	projectRepository proPor.ProjectRepository
 	inputService      proPor.UserInputService
 	projectName       string
-	logMessage        appPor.LogMessage
 	generatorID       proSer.GeneratorID
+	logger            appPor.Logger
 }
 
-func NewInitService(
+func NewInitializeService(
 	projectName string,
 	repository proPor.ProjectRepository,
 	inputSvc proPor.UserInputService,
-	logMessage appPor.LogMessage,
-	generatorID proSer.GeneratorID) *InitService {
-	return &InitService{
+	generatorID proSer.GeneratorID,
+	logger appPor.Logger) *InitializeService {
+	return &InitializeService{
 		projectRepository: repository,
 		inputService:      inputSvc,
 		projectName:       projectName,
-		logMessage:        logMessage,
 		generatorID:       generatorID,
+		logger:            logger,
 	}
 }
 
-func (s *InitService) InitializeProject(ctx context.Context, interactive bool) error {
-	s.logMessage.Info("initializing project...")
+func (s *InitializeService) Run(ctx context.Context, interactive bool) (*logAgg.Logger, error) {
+	logContext := map[string]string{
+		"process": "initialize",
+	}
+	runLog := s.logger.Start(logContext)
+
+	runRecord, err := s.logger.AddRun(runLog, "initialize")
+	if err != nil {
+		return runLog, err
+	}
+
 	exists, err := s.projectRepository.Exists()
 	if err != nil {
-		s.logMessage.Error(fmt.Sprintf("%v", err))
-		return err
+		runRecord.MarkAsFailure(err)
+		return runLog, err
 	}
 	if exists {
-		s.logMessage.Info(MessageProjectAlreadyExists)
-		return nil
+		runRecord.SetResult(MessageProjectAlreadyExists)
+		runRecord.MarkAsWarning()
+		return runLog, nil
 	}
 
 	var cfg *proVos.Config
 	if interactive {
 		cfg, err = s.gatherConfigFromUser(ctx)
 		if err != nil {
-			s.logMessage.Error(fmt.Sprintf("%v", err))
-			return err
+			runRecord.MarkAsFailure(err)
+			return runLog, err
 		}
 	} else {
 		cfg = s.gatherDefaultConfig()
@@ -63,15 +73,15 @@ func (s *InitService) InitializeProject(ctx context.Context, interactive bool) e
 
 	err = s.projectRepository.Save(cfg)
 	if err != nil {
-		s.logMessage.Error(fmt.Sprintf("%v", err))
-		return err
+		runRecord.MarkAsFailure(err)
+		return runLog, err
 	}
 
-	s.logMessage.Success("project initialized successfully")
-	return nil
+	runRecord.MarkAsSuccess()
+	return runLog, nil
 }
 
-func (s *InitService) gatherConfigFromUser(ctx context.Context) (*proVos.Config, error) {
+func (s *InitializeService) gatherConfigFromUser(ctx context.Context) (*proVos.Config, error) {
 	cfg := s.gatherDefaultConfig()
 
 	var err error
@@ -120,9 +130,9 @@ func (s *InitService) gatherConfigFromUser(ctx context.Context) (*proVos.Config,
 	return cfg, nil
 }
 
-func (s *InitService) gatherDefaultConfig() *proVos.Config {
-	return &proVos.Config {
-		Project: proVos.Project {
+func (s *InitializeService) gatherDefaultConfig() *proVos.Config {
+	return &proVos.Config{
+		Project: proVos.Project{
 			Name:         s.projectName,
 			Version:      proVos.DefaultProjectVersion,
 			Team:         proVos.DefaultProjectTeam,
@@ -130,14 +140,14 @@ func (s *InitService) gatherDefaultConfig() *proVos.Config {
 			Organization: proVos.DefaultProjectOrganization,
 		},
 		Template: proVos.NewTemplate(proVos.DefaultUrl, proVos.DefaultRef),
-		Runtime: proVos.Runtime {
+		Runtime: proVos.Runtime{
 			CoreVersion: proVos.DefaultCoreVersion,
-			Image: proVos.Image {
+			Image: proVos.Image{
 				Source: proVos.DefaultImageSource,
 				Tag:    proVos.DefaultImageTag,
 			},
 		},
-		State: proVos.State {
+		State: proVos.State{
 			Backend: proVos.DefaultStateBackend,
 			URL:     proVos.DefaultStateURL,
 		},

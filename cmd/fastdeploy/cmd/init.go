@@ -13,18 +13,17 @@ var initCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		factory := factories.NewServiceFactory()
 
-		logFile, err := factory.BuildFileLogRepository().CreateFile()
-		if err != nil {
-			return err
-		}
-		defer logFile.Close()
-
-		initService, err := factory.BuildInitService(logFile)
+		initService, err := factory.BuildInitService()
 		if err != nil {
 			return err
 		}
 
-		if err = initService.InitializeProject(cmd.Context(), !nonInteractive);err != nil {
+		logger, err := initService.Run(cmd.Context(), !nonInteractive)
+
+		presenter := factory.BuildPresenter()
+		presenter.Render(logger)
+
+		if err != nil {
 			return err
 		}
 		return nil

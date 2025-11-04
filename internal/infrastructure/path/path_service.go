@@ -21,10 +21,6 @@ func (pr *PathService) GetFastdeployHome() string {
 	return pr.fastdeployHome
 }
 
-func (pr *PathService) GetLogsPath() string {
-	return filepath.Join(pr.fastdeployHome, "logs")
-}
-
 func getFastdeployHome() string {
 	viper.SetEnvPrefix("FASTDEPLOY")
 	viper.AutomaticEnv()

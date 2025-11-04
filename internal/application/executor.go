@@ -11,81 +11,88 @@ import (
 	docVos "github.com/jairoprogramador/fastdeploy/internal/domain/docker/vos"
 	proPor "github.com/jairoprogramador/fastdeploy/internal/domain/project/ports"
 	proVos "github.com/jairoprogramador/fastdeploy/internal/domain/project/vos"
+	logAgg "github.com/jairoprogramador/fastdeploy/internal/domain/logger/aggregates"
+
 	fdplug "github.com/jairoprogramador/fastdeploy/internal/fdplugin"
 )
 
 const MessageProjectNotInitialized = "project not initialized. Please run 'fd init' first"
 
-type OrderService struct {
-	isTerminal        bool
-	workDir           string
-	fastdeployHome    string
-	projectRepository proPor.ProjectRepository
-	dockerService     docPor.DockerService
-	authService       appPor.AuthService
-	variableResolver  appPor.VarsResolver
-	logMessage        appPor.LogMessage
+type ExecutorService struct {
+	fileConfig          *proVos.Config
+	isTerminal          bool
+	hostProjectPath     string
+	hostFastdeployPath  string
+	projectRepository   proPor.ProjectRepository
+	dockerService       docPor.DockerService
+	authService         appPor.AuthService
+	variableResolver    appPor.VarsResolver
+	logger              appPor.Logger
 }
 
-func NewOrderService(
+func NewExecutorService(
+	fileConfig *proVos.Config,
 	isTerminal bool,
-	workDir string,
-	fastdeployHome string,
+	hostProjectPath string,
+	hostFastdeployPath string,
 	projectRepository proPor.ProjectRepository,
 	dockerService docPor.DockerService,
 	authService appPor.AuthService,
 	variableResolver appPor.VarsResolver,
-	logMessage appPor.LogMessage,
-) *OrderService {
-	return &OrderService{
-		isTerminal:        isTerminal,
-		workDir:           workDir,
-		fastdeployHome:    fastdeployHome,
-		projectRepository: projectRepository,
-		dockerService:     dockerService,
-		authService:       authService,
-		variableResolver:  variableResolver,
-		logMessage:        logMessage,
+	logger appPor.Logger,
+) *ExecutorService {
+	return &ExecutorService {
+		fileConfig:          fileConfig,
+		isTerminal:          isTerminal,
+		hostProjectPath:     hostProjectPath,
+		hostFastdeployPath:  hostFastdeployPath,
+		projectRepository:   projectRepository,
+		dockerService:       dockerService,
+		authService:         authService,
+		variableResolver:    variableResolver,
+		logger:              logger,
 	}
 }
 
-func (s *OrderService) ExecuteOrder(ctx context.Context, order, env string, withTty bool) error {
-	s.logMessage.Info(fmt.Sprintf("executing order: %s", order))
+func (s *ExecutorService) Run(ctx context.Context, command, environment string, withTty bool) (*logAgg.Logger, error) {
+	logContext := map[string]string{
+		"process":    "executor",
+	}
+	runLog := s.logger.Start(logContext)
+
+	runRecord, err := s.logger.AddRun(runLog, "executor")
+	if err != nil {
+		return runLog, err
+	}
 
 	exists, err := s.projectRepository.Exists()
 	if err != nil {
-		s.logMessage.Error(fmt.Sprintf("%v", err))
-		return err
+		runRecord.MarkAsFailure(err)
+		return runLog, err
 	}
 	if !exists {
-		s.logMessage.Info(MessageProjectNotInitialized)
-		return nil
+		runRecord.SetResult(MessageProjectNotInitialized)
+		runRecord.MarkAsWarning()
+		return runLog, nil
 	}
 
-	if err := s.dockerService.Check(ctx); err != nil {
-		s.logMessage.Error(fmt.Sprintf("%v", err))
-		return err
-	}
-
-	fileConfig, err := s.projectRepository.Load()
-	if err != nil {
-		s.logMessage.Error(fmt.Sprintf("%v", err))
-		return err
+	if err := s.dockerService.Check(ctx, runRecord); err != nil {
+		runRecord.MarkAsFailure(err)
+		return runLog, err
 	}
 
 	internalVars := make(map[string]string)
 
-	if fileConfig.Auth.Plugin != "" {
-		s.logMessage.Info("Authenticating...")
-		
+	if s.fileConfig.Auth.Plugin != "" {
+
 		resolvedParams := &fdplug.AuthConfig{
-			ClientId:  s.variableResolver.Resolve(fileConfig.Auth.Params.ClientID, internalVars),
-			ClientSecret: s.variableResolver.Resolve(fileConfig.Auth.Params.ClientSecret, internalVars),
-			GrantType: fdplug.AuthGrantType(fdplug.AuthGrantType_value[fileConfig.Auth.Params.GrantType]),
-			Extra:     make(map[string]string),
-			Scope:     fileConfig.Auth.Params.Scope,
+			ClientId:     s.variableResolver.Resolve(s.fileConfig.Auth.Params.ClientID, internalVars),
+			ClientSecret: s.variableResolver.Resolve(s.fileConfig.Auth.Params.ClientSecret, internalVars),
+			GrantType:    fdplug.AuthGrantType(fdplug.AuthGrantType_value[s.fileConfig.Auth.Params.GrantType]),
+			Extra:        make(map[string]string),
+			Scope:        s.fileConfig.Auth.Params.Scope,
 		}
-		for key, val := range fileConfig.Auth.Params.Extra {
+		for key, val := range s.fileConfig.Auth.Params.Extra {
 			resolvedParams.Extra[key] = s.variableResolver.Resolve(val, internalVars)
 		}
 
@@ -93,40 +100,43 @@ func (s *OrderService) ExecuteOrder(ctx context.Context, order, env string, with
 			Config: resolvedParams,
 		}
 
-		authResp, err := s.authService.Authenticate(ctx, fileConfig.Auth.Plugin, authenticateRequest)
+		authResp, err := s.authService.Authenticate(ctx, s.fileConfig.Auth.Plugin, authenticateRequest)
 		if err != nil {
-			s.logMessage.Error(fmt.Sprintf("Authentication failed: %v", err))
-			return err
+			runRecord.MarkAsFailure(err)
+			return runLog, err
 		}
 
-		tokenVarName := strings.ToUpper(fileConfig.Auth.Plugin) + "_ACCESS_TOKEN"
+		tokenVarName := strings.ToUpper(s.fileConfig.Auth.Plugin) + "_ACCESS_TOKEN"
 		internalVars[tokenVarName] = authResp.Token.AccessToken
-		s.logMessage.Success("Authentication successful")
 	}
 
 	var localImage docVos.Image
-	if fileConfig.Runtime.Image.Source != "" {
+	if s.fileConfig.Runtime.Image.Source != "" {
 		localImage = docVos.Image{
-			Name: fileConfig.Runtime.Image.Source,
-			Tag:  fileConfig.Runtime.Image.Tag}
+			Name: s.fileConfig.Runtime.Image.Source,
+			Tag:  s.fileConfig.Runtime.Image.Tag}
 	} else {
-		buildOpts, localImageBuilt := s.prepareBuildOptions(fileConfig)
-		if err := s.dockerService.Build(ctx, buildOpts); err != nil {
-			return err
+		buildOpts, localImageBuilt := s.prepareBuildOptions(s.fileConfig)
+		if err := s.dockerService.Build(ctx, buildOpts, runRecord); err != nil {
+			runRecord.MarkAsFailure(err)
+			return runLog, err
 		}
 		localImage = localImageBuilt
 	}
 
-	runOpts := s.prepareRunOptions(fileConfig, localImage, s.workDir, order, env, withTty, internalVars)
-	if err := s.dockerService.Run(ctx, runOpts); err != nil {
-		return err
+	runOpts := s.prepareRunOptions(s.fileConfig, localImage, s.hostProjectPath, command, environment, withTty, internalVars)
+	output, err := s.dockerService.Run(ctx, runOpts, runRecord)
+	if err != nil {
+		runRecord.MarkAsFailure(err)
+		return runLog, err
+	} else {
+		runRecord.SetResult(output)
+		runRecord.MarkAsSuccess()
+		return runLog, nil
 	}
-
-	s.logMessage.Success("Order executed successfully")
-	return nil
 }
 
-func (s *OrderService) prepareBuildOptions(fileConfig *proVos.Config) (docVos.BuildOptions, docVos.Image) {
+func (s *ExecutorService) prepareBuildOptions(fileConfig *proVos.Config) (docVos.BuildOptions, docVos.Image) {
 	localImageName := fmt.Sprintf("%s-%s",
 		fileConfig.Project.Team,
 		fileConfig.Template.NameTemplate(),
@@ -152,12 +162,12 @@ func (s *OrderService) prepareBuildOptions(fileConfig *proVos.Config) (docVos.Bu
 	}, localImage
 }
 
-func (s *OrderService) prepareRunOptions(
+func (s *ExecutorService) prepareRunOptions(
 	fileConfig *proVos.Config,
 	image docVos.Image,
 	workDir,
-	order,
-	env string,
+	command,
+	environment string,
 	withTty bool,
 	internalVars map[string]string,
 ) docVos.RunOptions {
@@ -186,13 +196,13 @@ func (s *OrderService) prepareRunOptions(
 
 		stateContainerPath, okStateContainerPath := volumesMap[proVos.StatePathKey]
 		if !okStateContainerPath {
-			volumesMap[s.fastdeployHome] = proVos.DefaultContainerStatePath
+			volumesMap[s.hostFastdeployPath] = proVos.DefaultContainerFastdeployPath
 		} else {
-			volumesMap[s.fastdeployHome] = stateContainerPath
+			volumesMap[s.hostFastdeployPath] = stateContainerPath
 			delete(volumesMap, proVos.StatePathKey)
 		}
 
-		envVars["FASTDEPLOY_HOME"] = volumesMap[s.fastdeployHome]
+		envVars["FASTDEPLOY_HOME"] = volumesMap[s.hostFastdeployPath]
 	}
 
 	volumes := make([]docVos.Volume, 0, len(volumesMap))
@@ -211,15 +221,14 @@ func (s *OrderService) prepareRunOptions(
 		groups = append(groups, "$(getent group docker | cut -d: -f3)")
 	}
 
-
 	return docVos.RunOptions{
 		Image:        image,
 		Volumes:      volumes,
 		EnvVars:      envVars,
-		Command:      strings.TrimSpace(fmt.Sprintf("%s %s", order, env)),
+		Command:      strings.TrimSpace(fmt.Sprintf("%s %s", command, environment)),
 		Interactive:  interactive,
 		AllocateTTY:  allocateTty,
 		RemoveOnExit: true,
-		Groups:		  groups,
+		Groups:       groups,
 	}
 }

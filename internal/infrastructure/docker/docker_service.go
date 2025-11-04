@@ -5,36 +5,40 @@ import (
 	"fmt"
 	"strings"
 
-	appPor "github.com/jairoprogramador/fastdeploy/internal/application/ports"
 	docPor "github.com/jairoprogramador/fastdeploy/internal/domain/docker/ports"
 	docVos "github.com/jairoprogramador/fastdeploy/internal/domain/docker/vos"
+	domEnt "github.com/jairoprogramador/fastdeploy/internal/domain/logger/entities"
 	"github.com/jairoprogramador/fastdeploy/internal/infrastructure/executor"
 )
 
 type DockerService struct {
-	exec   executor.CommandExecutor
-	logger appPor.LogMessage
+	exec executor.CommandExecutor
 }
 
-func NewDockerService(exec executor.CommandExecutor, logger appPor.LogMessage) docPor.DockerService {
+func NewDockerService(exec executor.CommandExecutor) docPor.DockerService {
 	return &DockerService{
-		exec:   exec,
-		logger: logger,
+		exec: exec,
 	}
 }
 
-func (s *DockerService) Check(ctx context.Context) error {
-	s.logger.Detail("Checking for Docker...")
-	err := s.exec.Execute(ctx, "docker --version", "")
+func (s *DockerService) Check(ctx context.Context, stepRecord *domEnt.RunRecord) error {
+	taskRecord, _ := domEnt.NewTaskRecord("check docker version")
+	stepRecord.AddTask(taskRecord)
+
+	command := "docker --version"
+	output, err := s.exec.Execute(ctx, command, "")
 	if err != nil {
+		taskRecord.SetCommand(command)
+		taskRecord.AddOutput(output)
+		taskRecord.MarkAsFailure(err)
 		return err
 	}
-	s.logger.Detail("Docker check successful")
 	return nil
 }
 
-func (s *DockerService) Build(ctx context.Context, opts docVos.BuildOptions) error {
-	s.logger.Detail(fmt.Sprintf("Building image: %s", opts.Image.FullName()))
+func (s *DockerService) Build(ctx context.Context, opts docVos.BuildOptions, stepRecord *domEnt.RunRecord) error {
+	taskRecord, _ := domEnt.NewTaskRecord("build image")
+	stepRecord.AddTask(taskRecord)
 
 	var commandBuilder strings.Builder
 	commandBuilder.WriteString("docker build")
@@ -51,16 +55,20 @@ func (s *DockerService) Build(ctx context.Context, opts docVos.BuildOptions) err
 
 	commandBuilder.WriteString(fmt.Sprintf(" %s", opts.Context))
 
-	err := s.exec.Execute(ctx, commandBuilder.String(), opts.Context)
+	output, err := s.exec.Execute(ctx, commandBuilder.String(), opts.Context)
 	if err != nil {
+		taskRecord.SetCommand(commandBuilder.String())
+		taskRecord.AddOutput(output)
+		taskRecord.MarkAsFailure(err)
 		return err
 	}
-	s.logger.Detail("Build image successful")
 	return nil
 }
 
-func (s *DockerService) Run(ctx context.Context, opts docVos.RunOptions) error {
-	s.logger.Detail("Running image...")
+func (s *DockerService) Run(ctx context.Context, opts docVos.RunOptions, stepRecord *domEnt.RunRecord) (string, error) {
+	taskRecord, _ := domEnt.NewTaskRecord("run container")
+	stepRecord.AddTask(taskRecord)
+
 	var commandBuilder strings.Builder
 	commandBuilder.WriteString("docker run")
 
@@ -93,19 +101,12 @@ func (s *DockerService) Run(ctx context.Context, opts docVos.RunOptions) error {
 	commandBuilder.WriteString(fmt.Sprintf(" %s", opts.Image.FullName()))
 	commandBuilder.WriteString(fmt.Sprintf(" %s", opts.Command))
 
-	err := s.exec.Execute(ctx, commandBuilder.String(), "")
+	output, err := s.exec.ExecuteContainer(ctx, commandBuilder.String(), "")
 	if err != nil {
-		return err
+		taskRecord.SetCommand(commandBuilder.String())
+		taskRecord.AddOutput(output)
+		taskRecord.MarkAsFailure(err)
+		return "", err
 	}
-	s.logger.Detail("Run image successful")
-	return nil
+	return output, nil
 }
-
-   /*  docker run --rm \
-      -e ARM_ACCESS_TOKEN="<pega-el-token-aqui>" \
-      -e ARM_SUBSCRIPTION_ID="<tu-id-de-suscripcion>" \
-      -e FASTDEPLOY_HOME=/home/fastdeploy/.fastdeploy \
-      -v /home/jairo/.m2/:/home/fastdeploy/.m2 \
-      -v /home/jairo/Developer/java/test:/home/fastdeploy/app \
-      -v /home/jairo/Developer/go/dirFastDeploy:/home/fastdeploy/.fastdeploy \
-      shikigami-mydeploy:latest test . */

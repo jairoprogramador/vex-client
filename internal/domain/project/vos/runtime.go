@@ -7,8 +7,9 @@ const (
 )
 
 const (
-	DefaultContainerProjectPath = "/home/fastdeploy/app"
-	DefaultContainerStatePath   = "/home/fastdeploy/.fastdeploy"
+	defaultContainerHomePath       = "/home/fastdeploy"
+	DefaultContainerProjectPath    = defaultContainerHomePath + "/app"
+	DefaultContainerFastdeployPath = defaultContainerHomePath + "/.fastdeploy"
 )
 
 const (

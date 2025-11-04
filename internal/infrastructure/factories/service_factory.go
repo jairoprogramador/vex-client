@@ -1,7 +1,6 @@
 package factories
 
 import (
-	"io"
 	"os"
 	"path/filepath"
 
@@ -11,18 +10,17 @@ import (
 	"github.com/jairoprogramador/fastdeploy/internal/infrastructure/auth"
 	"github.com/jairoprogramador/fastdeploy/internal/infrastructure/docker"
 	"github.com/jairoprogramador/fastdeploy/internal/infrastructure/executor"
-	"github.com/jairoprogramador/fastdeploy/internal/infrastructure/logger"
 	"github.com/jairoprogramador/fastdeploy/internal/infrastructure/path"
 	"github.com/jairoprogramador/fastdeploy/internal/infrastructure/project"
 	"github.com/jairoprogramador/fastdeploy/internal/infrastructure/variable"
+	"github.com/jairoprogramador/fastdeploy/internal/infrastructure/logger"
 	"github.com/mattn/go-isatty"
 )
 
 type ServiceFactory interface {
-	BuildLogService(logFile io.WriteCloser) *applic.LogService
-	BuildOrderService(logFile io.WriteCloser) (*applic.OrderService, error)
-	BuildInitService(logFile io.WriteCloser) (*applic.InitService, error)
-	BuildFileLogRepository() appPor.LogRepository
+	BuildOrderService() (*applic.ExecutorService, error)
+	BuildInitService() (*applic.InitializeService, error)
+	BuildPresenter() appPor.Presenter
 }
 
 type serviceFactory struct{}
@@ -31,19 +29,11 @@ func NewServiceFactory() ServiceFactory {
 	return &serviceFactory{}
 }
 
-func (f *serviceFactory) BuildFileLogRepository() appPor.LogRepository {
-	pathService := path.NewPathService()
-	return logger.NewFileLogRepository(pathService)
+func (f *serviceFactory) BuildPresenter() appPor.Presenter {
+	return logger.NewConsolePresenter()
 }
 
-func (f *serviceFactory) BuildLogService(logFile io.WriteCloser) *applic.LogService {
-	logRepo := f.BuildFileLogRepository()
-	appLogger := logger.NewLoggerService(os.Stdout, logFile, false)
-	logService := applic.NewLogService(logRepo, appLogger)
-	return logService
-}
-
-func (f *serviceFactory) BuildInitService(logFile io.WriteCloser) (*applic.InitService, error) {
+func (f *serviceFactory) BuildInitService() (*applic.InitializeService, error) {
 	projectRepository, workDir, err := f.getProjectRepository()
 	if err != nil {
 		return nil, err
@@ -51,12 +41,13 @@ func (f *serviceFactory) BuildInitService(logFile io.WriteCloser) (*applic.InitS
 
 	generatorID := project.NewShaGeneratorID()
 
-	appLogger := logger.NewLoggerService(os.Stdout, logFile, false)
+	appLogger := applic.NewAppLogger()
+
 	inputService := project.NewSurveyUserInputService()
-	return applic.NewInitService(filepath.Base(workDir), projectRepository, inputService, appLogger, generatorID), nil
+	return applic.NewInitializeService(filepath.Base(workDir), projectRepository, inputService, generatorID, appLogger), nil
 }
 
-func (f *serviceFactory) BuildOrderService(logFile io.WriteCloser) (*applic.OrderService, error) {
+func (f *serviceFactory) BuildOrderService() (*applic.ExecutorService, error) {
 	projectRepository, workDir, err := f.getProjectRepository()
 	if err != nil {
 		return nil, err
@@ -66,15 +57,21 @@ func (f *serviceFactory) BuildOrderService(logFile io.WriteCloser) (*applic.Orde
 
 	pathService := path.NewPathService()
 
-	appLogger := logger.NewLoggerService(os.Stdout, logFile, false)
+	appLogger := applic.NewAppLogger()
 
-	cmdExecutor := executor.NewShellExecutor(appLogger)
-	dockerService := docker.NewDockerService(cmdExecutor, appLogger)
+	cmdExecutor := executor.NewShellExecutor()
+	dockerService := docker.NewDockerService(cmdExecutor)
 
 	authService := auth.NewAuthService()
 	variableResolver := variable.NewVariableResolver()
 
-	return applic.NewOrderService(
+	fileConfig, err := projectRepository.Load()
+	if err != nil {
+		return nil, err
+	}
+
+	return applic.NewExecutorService(
+		fileConfig,
 		isTerminal,
 		workDir,
 		pathService.GetFastdeployHome(),

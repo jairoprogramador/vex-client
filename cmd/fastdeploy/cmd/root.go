@@ -6,15 +6,18 @@ import (
 	"os"
 	"github.com/jairoprogramador/fastdeploy/internal/infrastructure/factories"
 	"github.com/spf13/cobra"
+	"strings"
+	"github.com/jairoprogramador/fastdeploy/internal/domain/logger/vos"
 )
 
 var (
 	version = "0.1.0"
-	withTty bool
+	withTtyFlag bool
+	colorFlag string
 )
 
-var rootCmd = &cobra.Command{
-	Use:   "fastdeploy",
+var rootCmd = &cobra.Command {
+	Use:   "fd",
 	Short: "fastdeploy is a CLI tool for managing and deploying projects",
 	Long:  `fastdeploy is a powerful and flexible CLI tool designed to streamline your development and deployment workflows.`,
 	Args: func(cmd *cobra.Command, args []string) error {
@@ -36,24 +39,32 @@ var rootCmd = &cobra.Command{
 			return cmd.Help()
 		}
 
-		order := args[0]
-		env := ""
+		command := args[0]
+		environment := ""
 		if len(args) > 1 {
-			env = args[1]
+			environment = args[1]
 		}
 
 		factory := factories.NewServiceFactory()
-		logFile, err := factory.BuildFileLogRepository().CreateFile()
-		if err != nil {
-			return err
-		}
-		defer logFile.Close()
 
-		orderService, err := factory.BuildOrderService(logFile)
+		orderService, err := factory.BuildOrderService()
 		if err != nil {
 			return err
 		}
-		return orderService.ExecuteOrder(cmd.Context(), order, env, withTty)
+
+		environmentColor := fmt.Sprintf("%s --color=%s", strings.TrimSpace(environment), colorFlag)
+
+		logger, err := orderService.Run(cmd.Context(), command, environmentColor, withTtyFlag)
+		
+		if logger.Status() != vos.Success {
+			presenter := factory.BuildPresenter()
+			presenter.Render(logger)
+		}
+
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 }
 
@@ -65,11 +76,11 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().BoolVar(&withTty, "with-tty", false, "Enable pseudo-TTY allocation.")
+	rootCmd.PersistentFlags().BoolVar(&withTtyFlag, "with-tty", false, "Enable pseudo-TTY allocation.")
+	rootCmd.PersistentFlags().StringVar(&colorFlag, "color", "always", "control color output (auto, always, never)")
 	rootCmd.Version = fmt.Sprintf("v%s\n", version)
 	rootCmd.SetVersionTemplate(`{{.Version}}`)
 
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(versionCmd)
-	rootCmd.AddCommand(logCmd)
 }
