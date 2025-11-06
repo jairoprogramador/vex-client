@@ -4,6 +4,7 @@ const (
 	DefaultCoreVersion = "1.0.6"
 	DefaultImageSource = "jairoprogramador/fdrunjava17azure"
 	DefaultImageTag    = "latest"
+	DefaultDockerfile  = "Dockerfile"
 )
 
 const (
@@ -18,15 +19,15 @@ const (
 )
 
 type Runtime struct {
-	CoreVersion string
-	Image       Image
-	Volumes     []Volume
-	Env         []EnvVar
+	Image   Image
+	Volumes []Volume
+	Env     []EnvVar
 }
 
 type Image struct {
-	Source string
-	Tag    string
+	Source      string
+	Tag         string
+	CoreVersion string
 }
 
 type Volume struct {

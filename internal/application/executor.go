@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"runtime"
 	"strings"
-
+	"errors"
 	appPor "github.com/jairoprogramador/fastdeploy/internal/application/ports"
 	docPor "github.com/jairoprogramador/fastdeploy/internal/domain/docker/ports"
 	docVos "github.com/jairoprogramador/fastdeploy/internal/domain/docker/vos"
@@ -27,6 +27,7 @@ type ExecutorService struct {
 	dockerService       docPor.DockerService
 	authService         appPor.AuthService
 	variableResolver    appPor.VarsResolver
+	coreVersion         appPor.CoreVersion
 	logger              appPor.Logger
 }
 
@@ -39,6 +40,7 @@ func NewExecutorService(
 	dockerService docPor.DockerService,
 	authService appPor.AuthService,
 	variableResolver appPor.VarsResolver,
+	coreVersion appPor.CoreVersion,
 	logger appPor.Logger,
 ) *ExecutorService {
 	return &ExecutorService {
@@ -50,6 +52,7 @@ func NewExecutorService(
 		dockerService:       dockerService,
 		authService:         authService,
 		variableResolver:    variableResolver,
+		coreVersion:         coreVersion,
 		logger:              logger,
 	}
 }
@@ -70,10 +73,17 @@ func (s *ExecutorService) Run(ctx context.Context, command, environment string, 
 		runRecord.MarkAsFailure(err)
 		return runLog, err
 	}
+	
 	if !exists {
 		runRecord.SetResult(MessageProjectNotInitialized)
 		runRecord.MarkAsWarning()
 		return runLog, nil
+	}
+
+	if s.fileConfig.Runtime.Image.Source == "" {
+		err := errors.New("runtime image Source is required")
+		runRecord.MarkAsFailure(err)
+		return runLog, err
 	}
 
 	if err := s.dockerService.Check(ctx, runRecord); err != nil {
@@ -85,7 +95,7 @@ func (s *ExecutorService) Run(ctx context.Context, command, environment string, 
 
 	if s.fileConfig.Auth.Plugin != "" {
 
-		resolvedParams := &fdplug.AuthConfig{
+		resolvedParams := &fdplug.AuthConfig {
 			ClientId:     s.variableResolver.Resolve(s.fileConfig.Auth.Params.ClientID, internalVars),
 			ClientSecret: s.variableResolver.Resolve(s.fileConfig.Auth.Params.ClientSecret, internalVars),
 			GrantType:    fdplug.AuthGrantType(fdplug.AuthGrantType_value[s.fileConfig.Auth.Params.GrantType]),
@@ -111,7 +121,7 @@ func (s *ExecutorService) Run(ctx context.Context, command, environment string, 
 	}
 
 	var localImage docVos.Image
-	if s.fileConfig.Runtime.Image.Source != "" {
+	if s.fileConfig.Runtime.Image.Source != proVos.DefaultDockerfile {
 		localImage = docVos.Image{
 			Name: s.fileConfig.Runtime.Image.Source,
 			Tag:  s.fileConfig.Runtime.Image.Tag}
@@ -150,14 +160,24 @@ func (s *ExecutorService) prepareBuildOptions(fileConfig *proVos.Config) (docVos
 		buildArgs["DEV_GID"] = "$(id -g)"
 	}
 
-	if fileConfig.Runtime.CoreVersion != "" {
-		buildArgs["FASTDEPLOY_VERSION"] = fileConfig.Runtime.CoreVersion
+	if fileConfig.Runtime.Image.CoreVersion != "" {
+		buildArgs["FASTDEPLOY_VERSION"] = fileConfig.Runtime.Image.CoreVersion
+	} else {
+		latestCoreVersion, errVersion := s.coreVersion.GetLatestVersion()
+		if errVersion != nil {
+			fmt.Println("puede especificar la versión del core manualmente en el archivo fdconfig.yaml (runtime.image.core_version) : ", errVersion)
+		} else if latestCoreVersion != "" {
+			buildArgs["FASTDEPLOY_VERSION"] = latestCoreVersion
+		}
+		if buildArgs["FASTDEPLOY_VERSION"] == "" {
+			buildArgs["FASTDEPLOY_VERSION"] = proVos.DefaultCoreVersion
+		}
 	}
 
 	return docVos.BuildOptions{
 		Image:      localImage,
 		Context:    ".",
-		Dockerfile: "Dockerfile",
+		Dockerfile: proVos.DefaultDockerfile,
 		Args:       buildArgs,
 	}, localImage
 }

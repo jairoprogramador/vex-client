@@ -45,8 +45,7 @@ func (f *serviceFactory) BuildInitService() (*applic.InitializeService, error) {
 	appLogger := applic.NewAppLogger()
 
 	inputService := project.NewSurveyUserInputService()
-	coreVersion := app.NewGithubCoreVersion()
-	return applic.NewInitializeService(filepath.Base(workDir), projectRepository, inputService, coreVersion, generatorID, appLogger), nil
+	return applic.NewInitializeService(filepath.Base(workDir), projectRepository, inputService, generatorID, appLogger), nil
 }
 
 func (f *serviceFactory) BuildOrderService() (*applic.ExecutorService, error) {
@@ -71,6 +70,7 @@ func (f *serviceFactory) BuildOrderService() (*applic.ExecutorService, error) {
 	if err != nil {
 		return nil, err
 	}
+	coreVersion := app.NewGithubCoreVersion()
 
 	return applic.NewExecutorService(
 		fileConfig,
@@ -81,6 +81,7 @@ func (f *serviceFactory) BuildOrderService() (*applic.ExecutorService, error) {
 		dockerService,
 		authService,
 		variableResolver,
+		coreVersion,
 		appLogger), nil
 }
 

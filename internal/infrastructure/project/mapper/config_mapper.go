@@ -45,10 +45,10 @@ func ToDomain(configDto dto.FileConfig) *vos.Config {
 		},
 		Template: vos.NewTemplate(configDto.Template.URL, configDto.Template.Ref),
 		Runtime: vos.Runtime{
-			CoreVersion: configDto.Runtime.CoreVersion,
 			Image: vos.Image{
-				Source: configDto.Runtime.Image.Source,
-				Tag:    configDto.Runtime.Image.Tag,
+				Source:      configDto.Runtime.Image.Source,
+				Tag:         configDto.Runtime.Image.Tag,
+				CoreVersion: configDto.Runtime.Image.CoreVersion,
 			},
 			Volumes: domainVolumes,
 			Env:     domainEnvVars,
@@ -107,10 +107,10 @@ func ToDto(config *vos.Config) dto.FileConfig {
 			Ref: config.Template.Ref(),
 		},
 		Runtime: dto.RuntimeDTO{
-			CoreVersion: config.Runtime.CoreVersion,
 			Image: dto.ImageDTO{
 				Source: config.Runtime.Image.Source,
 				Tag:    config.Runtime.Image.Tag,
+				CoreVersion: config.Runtime.Image.CoreVersion,
 			},
 			Volumes: dtoVolumes,
 			Env:     dtoEnvVars,

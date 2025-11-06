@@ -23,10 +23,9 @@ type TemplateDTO struct {
 }
 
 type RuntimeDTO struct {
-	CoreVersion string      `yaml:"core_version"`
-	Image       ImageDTO    `yaml:"image"`
-	Volumes     []VolumeDTO `yaml:"volumes,omitempty"`
-	Env         []EnvVarDTO `yaml:"env,omitempty"`
+	Image   ImageDTO    `yaml:"image"`
+	Volumes []VolumeDTO `yaml:"volumes,omitempty"`
+	Env     []EnvVarDTO `yaml:"env,omitempty"`
 }
 
 type StateDTO struct {
@@ -53,8 +52,9 @@ type EnvVarDTO struct {
 }
 
 type ImageDTO struct {
-	Source string `yaml:"source,omitempty"`
-	Tag    string `yaml:"tag"`
+	Source      string `yaml:"source,omitempty"`
+	Tag         string `yaml:"tag"`
+	CoreVersion string `yaml:"core_version,omitempty"`
 }
 
 type VolumeDTO struct {

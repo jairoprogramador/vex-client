@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"fmt"
 	"runtime"
 
 	logAgg "github.com/jairoprogramador/fastdeploy/internal/domain/logger/aggregates"
@@ -19,7 +18,6 @@ type InitializeService struct {
 	projectRepository proPor.ProjectRepository
 	inputService      proPor.UserInputService
 	projectName       string
-	coreVersion       appPor.CoreVersion
 	generatorID       proSer.GeneratorID
 	logger            appPor.Logger
 }
@@ -28,14 +26,12 @@ func NewInitializeService(
 	projectName string,
 	repository proPor.ProjectRepository,
 	inputSvc proPor.UserInputService,
-	coreVersion appPor.CoreVersion,
 	generatorID proSer.GeneratorID,
 	logger appPor.Logger) *InitializeService {
 	return &InitializeService{
 		projectRepository: repository,
 		inputService:      inputSvc,
 		projectName:       projectName,
-		coreVersion:       coreVersion,
 		generatorID:       generatorID,
 		logger:            logger,
 	}
@@ -89,16 +85,6 @@ func (s *InitializeService) Run(ctx context.Context, interactive bool) (*logAgg.
 func (s *InitializeService) gatherConfigFromUser(ctx context.Context) (*proVos.Config, error) {
 	cfg := s.gatherDefaultConfig()
 
-	versionCore := cfg.Runtime.CoreVersion
-	latestCoreVersion, errVersion := s.coreVersion.GetLatestVersion()
-	if errVersion != nil {
-		fmt.Println("no se pudo obtener la versión más reciente del core:", errVersion)
-	} else {
-		if latestCoreVersion != "" {
-			versionCore = latestCoreVersion
-		}
-	}
-
 	var err error
 
 	cfg.Project.Name, err = s.inputService.Ask(ctx, "Project Name", cfg.Project.Name)
@@ -124,10 +110,6 @@ func (s *InitializeService) gatherConfigFromUser(ctx context.Context) (*proVos.C
 	}
 	cfg.Template = proVos.NewTemplate(templateUrl, "")
 
-	cfg.Runtime.CoreVersion, err = s.inputService.Ask(ctx, "Runtime Core Version", versionCore)
-	if err != nil {
-		return nil, err
-	}
 	cfg.Runtime.Image.Source, err = s.inputService.Ask(ctx, "Runtime Image Source", cfg.Runtime.Image.Source)
 	if err != nil {
 		return nil, err
@@ -161,8 +143,7 @@ func (s *InitializeService) gatherDefaultConfig() *proVos.Config {
 		},
 		Template: proVos.NewTemplate(proVos.DefaultUrl, proVos.DefaultRef),
 		Runtime: proVos.Runtime{
-			CoreVersion: proVos.DefaultCoreVersion,
-			Image: proVos.Image{
+			Image: proVos.Image {
 				Source: proVos.DefaultImageSource,
 				Tag:    proVos.DefaultImageTag,
 			},
