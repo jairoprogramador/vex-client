@@ -50,12 +50,12 @@ Puedes descargar el paquete `.deb` o `.rpm` desde la [página de Releases](https
 ```
 Alternativamente, puedes descargar el binario directamente:
 ```sh
-# curl -sL https://github.com/jairoprogramador/fastdeploy/releases/latest/download/fastdeploy_Linux_x86_64.tar.gz | tar xz
+# curl -sL https://github.com/jairoprogramador/fastdeploy/releases/download/v0.0.5/fastdeploy_0.0.5_linux_amd64.tar.gz | tar xz
 # sudo mv fastdeploy /usr/local/bin/
 ```
 
 ### Windows
-1.  Descarga el archivo `.zip` desde la [página de Releases](https://github.com/jairoprogramador/fastdeploy/releases).
+1.  Descarga el archivo `fastdeploy_*_windows_a*64.zip` desde la [página de Releases](https://github.com/jairoprogramador/fastdeploy/releases).
 2.  Descomprime el archivo.
 3.  Añade el ejecutable `fastdeploy.exe` a tu `PATH`.
 
