@@ -22,7 +22,7 @@ Olvídate de la complejidad de Docker y los detalles de bajo nivel. `fastdeploy`
 ## ✨ Características Principales
 
 *   **🚀 Inicialización Rápida**: Con `fastdeploy init`, la herramienta genera un archivo `fdconfig.yaml` adaptado a tus necesidades.
-*   **📄 Configuración Declarativa**: Define todo tu despliegue en un único archivo `fdconfig.yaml`. Fácil de leer, modificar y versionar.
+*   **📄 Configuración Declarativa**: Define tu configuracion de despliegue en un único archivo `fdconfig.yaml`. Fácil de leer, modificar y versionar.
 *   **🐳 Abstracción de Docker**: `fastdeploy` se encarga de construir la imagen de Docker y ejecutar el contenedor que aloja a `fastdeploy-core`. No necesitas ser un experto.
 *   **🔌 Orquestación Transparente**: Actúa como un punto de entrada único para `fastdeploy-core`, pasándole tus instrucciones y gestionando el ciclo de vida del contenedor por ti.
 
