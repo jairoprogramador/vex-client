@@ -166,10 +166,11 @@ func (s *ExecutorService) prepareBuildOptions(fileConfig *proVos.Config) (docVos
 		latestCoreVersion, errVersion := s.coreVersion.GetLatestVersion()
 		if errVersion != nil {
 			fmt.Println("puede especificar la versión del core manualmente en el archivo fdconfig.yaml (runtime.image.core_version) : ", errVersion)
-		} else {
-			if latestCoreVersion != "" {
-				buildArgs["FASTDEPLOY_VERSION"] = latestCoreVersion
-			}
+		} else if latestCoreVersion != "" {
+			buildArgs["FASTDEPLOY_VERSION"] = latestCoreVersion
+		}
+		if buildArgs["FASTDEPLOY_VERSION"] == "" {
+			buildArgs["FASTDEPLOY_VERSION"] = proVos.DefaultCoreVersion
 		}
 	}
 
