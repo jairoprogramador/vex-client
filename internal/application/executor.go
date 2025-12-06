@@ -2,16 +2,16 @@ package application
 
 import (
 	"context"
-	"fmt"
-	"runtime"
-	"strings"
 	"errors"
+	"fmt"
 	appPor "github.com/jairoprogramador/fastdeploy/internal/application/ports"
 	docPor "github.com/jairoprogramador/fastdeploy/internal/domain/docker/ports"
 	docVos "github.com/jairoprogramador/fastdeploy/internal/domain/docker/vos"
+	logAgg "github.com/jairoprogramador/fastdeploy/internal/domain/logger/aggregates"
 	proPor "github.com/jairoprogramador/fastdeploy/internal/domain/project/ports"
 	proVos "github.com/jairoprogramador/fastdeploy/internal/domain/project/vos"
-	logAgg "github.com/jairoprogramador/fastdeploy/internal/domain/logger/aggregates"
+	"runtime"
+	"strings"
 
 	fdplug "github.com/jairoprogramador/fastdeploy/internal/fdplugin"
 )
@@ -19,16 +19,16 @@ import (
 const MessageProjectNotInitialized = "project not initialized. Please run 'fd init' first"
 
 type ExecutorService struct {
-	fileConfig          *proVos.Config
-	isTerminal          bool
-	hostProjectPath     string
-	hostFastdeployPath  string
-	projectRepository   proPor.ProjectRepository
-	dockerService       docPor.DockerService
-	authService         appPor.AuthService
-	variableResolver    appPor.VarsResolver
-	coreVersion         appPor.CoreVersion
-	logger              appPor.Logger
+	fileConfig         *proVos.Config
+	isTerminal         bool
+	hostProjectPath    string
+	hostFastdeployPath string
+	projectRepository  proPor.ProjectRepository
+	dockerService      docPor.DockerService
+	authService        appPor.AuthService
+	variableResolver   appPor.VarsResolver
+	coreVersion        appPor.CoreVersion
+	logger             appPor.Logger
 }
 
 func NewExecutorService(
@@ -43,23 +43,23 @@ func NewExecutorService(
 	coreVersion appPor.CoreVersion,
 	logger appPor.Logger,
 ) *ExecutorService {
-	return &ExecutorService {
-		fileConfig:          fileConfig,
-		isTerminal:          isTerminal,
-		hostProjectPath:     hostProjectPath,
-		hostFastdeployPath:  hostFastdeployPath,
-		projectRepository:   projectRepository,
-		dockerService:       dockerService,
-		authService:         authService,
-		variableResolver:    variableResolver,
-		coreVersion:         coreVersion,
-		logger:              logger,
+	return &ExecutorService{
+		fileConfig:         fileConfig,
+		isTerminal:         isTerminal,
+		hostProjectPath:    hostProjectPath,
+		hostFastdeployPath: hostFastdeployPath,
+		projectRepository:  projectRepository,
+		dockerService:      dockerService,
+		authService:        authService,
+		variableResolver:   variableResolver,
+		coreVersion:        coreVersion,
+		logger:             logger,
 	}
 }
 
 func (s *ExecutorService) Run(ctx context.Context, command, environment string, withTty bool) (*logAgg.Logger, error) {
 	logContext := map[string]string{
-		"process":    "executor",
+		"process": "executor",
 	}
 	runLog := s.logger.Start(logContext)
 
@@ -73,7 +73,7 @@ func (s *ExecutorService) Run(ctx context.Context, command, environment string, 
 		runRecord.MarkAsFailure(err)
 		return runLog, err
 	}
-	
+
 	if !exists {
 		runRecord.SetResult(MessageProjectNotInitialized)
 		runRecord.MarkAsWarning()
@@ -95,7 +95,7 @@ func (s *ExecutorService) Run(ctx context.Context, command, environment string, 
 
 	if s.fileConfig.Auth.Plugin != "" {
 
-		resolvedParams := &fdplug.AuthConfig {
+		resolvedParams := &fdplug.AuthConfig{
 			ClientId:     s.variableResolver.Resolve(s.fileConfig.Auth.Params.ClientID, internalVars),
 			ClientSecret: s.variableResolver.Resolve(s.fileConfig.Auth.Params.ClientSecret, internalVars),
 			GrantType:    fdplug.AuthGrantType(fdplug.AuthGrantType_value[s.fileConfig.Auth.Params.GrantType]),
@@ -185,7 +185,7 @@ func (s *ExecutorService) prepareBuildOptions(fileConfig *proVos.Config) (docVos
 func (s *ExecutorService) prepareRunOptions(
 	fileConfig *proVos.Config,
 	image docVos.Image,
-	workDir,
+	hostProjectPath,
 	command,
 	environment string,
 	withTty bool,
@@ -198,13 +198,7 @@ func (s *ExecutorService) prepareRunOptions(
 		volumesMap[volume.Host] = volume.Container
 	}
 
-	projectContainerPath, okProjectContainerPath := volumesMap[proVos.ProjectPathKey]
-	if !okProjectContainerPath {
-		volumesMap[workDir] = proVos.DefaultContainerProjectPath
-	} else {
-		volumesMap[workDir] = projectContainerPath
-		delete(volumesMap, proVos.ProjectPathKey)
-	}
+	volumesMap[hostProjectPath] = proVos.DefaultContainerProjectPath
 
 	envVars := make(map[string]string)
 
@@ -213,14 +207,7 @@ func (s *ExecutorService) prepareRunOptions(
 	}
 
 	if fileConfig.State.Backend == proVos.DefaultStateBackend {
-
-		stateContainerPath, okStateContainerPath := volumesMap[proVos.StatePathKey]
-		if !okStateContainerPath {
-			volumesMap[s.hostFastdeployPath] = proVos.DefaultContainerFastdeployPath
-		} else {
-			volumesMap[s.hostFastdeployPath] = stateContainerPath
-			delete(volumesMap, proVos.StatePathKey)
-		}
+		volumesMap[s.hostFastdeployPath] = proVos.DefaultContainerFastdeployPath
 
 		envVars["FASTDEPLOY_HOME"] = volumesMap[s.hostFastdeployPath]
 	}

@@ -7,14 +7,14 @@ import (
 	applic "github.com/jairoprogramador/fastdeploy/internal/application"
 	appPor "github.com/jairoprogramador/fastdeploy/internal/application/ports"
 	"github.com/jairoprogramador/fastdeploy/internal/domain/project/ports"
+	"github.com/jairoprogramador/fastdeploy/internal/infrastructure/app"
 	"github.com/jairoprogramador/fastdeploy/internal/infrastructure/auth"
 	"github.com/jairoprogramador/fastdeploy/internal/infrastructure/docker"
 	"github.com/jairoprogramador/fastdeploy/internal/infrastructure/executor"
+	"github.com/jairoprogramador/fastdeploy/internal/infrastructure/logger"
 	"github.com/jairoprogramador/fastdeploy/internal/infrastructure/path"
 	"github.com/jairoprogramador/fastdeploy/internal/infrastructure/project"
 	"github.com/jairoprogramador/fastdeploy/internal/infrastructure/variable"
-	"github.com/jairoprogramador/fastdeploy/internal/infrastructure/logger"
-	"github.com/jairoprogramador/fastdeploy/internal/infrastructure/app"
 	"github.com/mattn/go-isatty"
 )
 
@@ -49,7 +49,7 @@ func (f *serviceFactory) BuildInitService() (*applic.InitializeService, error) {
 }
 
 func (f *serviceFactory) BuildOrderService() (*applic.ExecutorService, error) {
-	projectRepository, workDir, err := f.getProjectRepository()
+	projectRepository, hostProjectPath, err := f.getProjectRepository()
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +75,7 @@ func (f *serviceFactory) BuildOrderService() (*applic.ExecutorService, error) {
 	return applic.NewExecutorService(
 		fileConfig,
 		isTerminal,
-		workDir,
+		hostProjectPath,
 		pathService.GetFastdeployHome(),
 		projectRepository,
 		dockerService,

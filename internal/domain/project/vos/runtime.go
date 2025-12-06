@@ -8,14 +8,9 @@ const (
 )
 
 const (
-	defaultContainerHomePath       = "/home/fastdeploy"
+	defaultContainerHomePath       = "$HOME"
 	DefaultContainerProjectPath    = defaultContainerHomePath + "/app"
 	DefaultContainerFastdeployPath = defaultContainerHomePath + "/.fastdeploy"
-)
-
-const (
-	ProjectPathKey = "projectPath"
-	StatePathKey   = "statePath"
 )
 
 type Runtime struct {
