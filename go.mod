@@ -1,4 +1,4 @@
-module github.com/jairoprogramador/fastdeploy-client
+module github.com/jairoprogramador/vex-client
 
 go 1.25.1
 

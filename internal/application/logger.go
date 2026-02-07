@@ -1,12 +1,12 @@
 package application
 
 import (
-	appPor "github.com/jairoprogramador/fastdeploy-client/internal/application/ports"
-	"github.com/jairoprogramador/fastdeploy-client/internal/domain/logger/aggregates"
-	"github.com/jairoprogramador/fastdeploy-client/internal/domain/logger/entities"
+	appPor "github.com/jairoprogramador/vex-client/internal/application/ports"
+	"github.com/jairoprogramador/vex-client/internal/domain/logger/aggregates"
+	"github.com/jairoprogramador/vex-client/internal/domain/logger/entities"
 )
 
-type AppLogger struct {}
+type AppLogger struct{}
 
 func NewAppLogger() appPor.Logger {
 	return &AppLogger{}
@@ -25,4 +25,3 @@ func (l *AppLogger) AddRun(logger *aggregates.Logger, stepName string) (*entitie
 
 	return runRecord, nil
 }
-

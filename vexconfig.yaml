@@ -2,8 +2,8 @@ project:
     id: 93a2489d193a6a97f8600d36c610be3893dff10694e57bc30ce353fa80c18d50
     name: test
     team: shikigami
-    description: mi despliegue con fastdeploy
-    organization: fastdeploy
+    description: mi despliegue con vex
+    organization: vex
 template:
     url: https://github.com/jairoprogramador/mydeploy.git
     ref: main
@@ -12,18 +12,18 @@ runtime:
     tag: latest
     build:
       args:
-        - name: "FASTDEPLOY_VERSION"
+        - name: "VEX_VERSION"
           value: "1.0.10"
         - name: "MAVEN_VERSION"
           value: "3.9.12"
     run:
       volumes:
-        - host: /home/jairo/.m2/
+        - host: /home/user/.m2/
           container: /home/ubuntu/.m2
-        - host: /home/jairo/Developer/java/test
-          container: /home/fastdeploy/app
-        - host: /home/jairo/Developer/go/dirFastDeploy
-          container: /home/ubuntu/.fastdeploy
+        - host: /home/user/projects/my-project
+          container: /home/vex/app
+        - host: /home/user/.vex
+          container: /home/ubuntu/.vex
       envs:
         - name: "ARM_CLIENT_ID"
           value: "$ARM_CLIENT_ID"

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jairoprogramador/fastdeploy-client/internal/domain/logger/vos"
+	"github.com/jairoprogramador/vex-client/internal/domain/logger/vos"
 )
 
 type TaskRecord struct {
@@ -23,10 +23,10 @@ func NewTaskRecord(name string) (*TaskRecord, error) {
 		return nil, fmt.Errorf("task name cannot be empty")
 	}
 	return &TaskRecord{
-		name:   name,
-		status: vos.Running,
+		name:      name,
+		status:    vos.Running,
 		startTime: time.Now(),
-		output: make([]vos.OutputLine, 0),
+		output:    make([]vos.OutputLine, 0),
 	}, nil
 }
 

@@ -3,8 +3,8 @@ package aggregates
 import (
 	"time"
 
-	"github.com/jairoprogramador/fastdeploy-client/internal/domain/logger/entities"
-	"github.com/jairoprogramador/fastdeploy-client/internal/domain/logger/vos"
+	"github.com/jairoprogramador/vex-client/internal/domain/logger/entities"
+	"github.com/jairoprogramador/vex-client/internal/domain/logger/vos"
 )
 
 type Logger struct {

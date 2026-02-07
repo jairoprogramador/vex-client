@@ -1,9 +1,9 @@
 package mapper
 
 import (
-	"github.com/jairoprogramador/fastdeploy-client/internal/domain/project/aggregates"
-	"github.com/jairoprogramador/fastdeploy-client/internal/domain/project/vos"
-	"github.com/jairoprogramador/fastdeploy-client/internal/infrastructure/project/dto"
+	"github.com/jairoprogramador/vex-client/internal/domain/project/aggregates"
+	"github.com/jairoprogramador/vex-client/internal/domain/project/vos"
+	"github.com/jairoprogramador/vex-client/internal/infrastructure/project/dto"
 )
 
 func ToDomainProject(configDto dto.ProjectDTO) (vos.ProjectID, vos.ProjectData, error) {

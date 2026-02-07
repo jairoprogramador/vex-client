@@ -5,14 +5,14 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jairoprogramador/fastdeploy-client/internal/domain/project/aggregates"
-	"github.com/jairoprogramador/fastdeploy-client/internal/domain/project/ports"
-	"github.com/jairoprogramador/fastdeploy-client/internal/infrastructure/project/dto"
-	"github.com/jairoprogramador/fastdeploy-client/internal/infrastructure/project/mapper"
+	"github.com/jairoprogramador/vex-client/internal/domain/project/aggregates"
+	"github.com/jairoprogramador/vex-client/internal/domain/project/ports"
+	"github.com/jairoprogramador/vex-client/internal/infrastructure/project/dto"
+	"github.com/jairoprogramador/vex-client/internal/infrastructure/project/mapper"
 	"gopkg.in/yaml.v3"
 )
 
-const configFileName = "fdconfig.yaml"
+const configFileName = "vexconfig.yaml"
 
 type yamlProjectRepository struct {
 	projectPath string

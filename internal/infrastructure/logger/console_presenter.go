@@ -8,11 +8,11 @@ import (
 
 	"github.com/fatih/color"
 
-	"github.com/jairoprogramador/fastdeploy-client/internal/application/ports"
+	"github.com/jairoprogramador/vex-client/internal/application/ports"
 
-	"github.com/jairoprogramador/fastdeploy-client/internal/domain/logger/aggregates"
-	"github.com/jairoprogramador/fastdeploy-client/internal/domain/logger/entities"
-	"github.com/jairoprogramador/fastdeploy-client/internal/domain/logger/vos"
+	"github.com/jairoprogramador/vex-client/internal/domain/logger/aggregates"
+	"github.com/jairoprogramador/vex-client/internal/domain/logger/entities"
+	"github.com/jairoprogramador/vex-client/internal/domain/logger/vos"
 )
 
 type failedInfo struct {
@@ -88,8 +88,8 @@ func (p *ConsolePresenter) finalSummary(log *aggregates.Logger) {
 	for _, step := range log.RunRecords() {
 		if step.Status() == vos.Failure {
 			faileds = append(faileds, failedInfo{
-				failedName: step.Name(),
-				failedErr:  step.Error(),
+				failedName:   step.Name(),
+				failedErr:    step.Error(),
 				failedOutput: step.Result(),
 			})
 		}
@@ -97,8 +97,8 @@ func (p *ConsolePresenter) finalSummary(log *aggregates.Logger) {
 		for _, task := range step.Tasks() {
 			if task.Status() == vos.Failure {
 				faileds = append(faileds, failedInfo{
-					failedName: task.Name(),
-					failedErr:  task.Error(),
+					failedName:   task.Name(),
+					failedErr:    task.Error(),
 					failedOutput: task.OutputString(),
 				})
 			}

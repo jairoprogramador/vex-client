@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jairoprogramador/fastdeploy-client/internal/domain/logger/vos"
+	"github.com/jairoprogramador/vex-client/internal/domain/logger/vos"
 )
 
 type RunRecord struct {
@@ -22,10 +22,10 @@ func NewRunRecord(name string) (*RunRecord, error) {
 		return nil, fmt.Errorf("step name cannot be empty")
 	}
 	return &RunRecord{
-		name:   name,
-		status: vos.Running,
+		name:      name,
+		status:    vos.Running,
 		startTime: time.Now(),
-		tasks:  []*TaskRecord{},
+		tasks:     []*TaskRecord{},
 	}, nil
 }
 

@@ -4,8 +4,8 @@ import "errors"
 
 const (
 	DefaultProjectTeam         = "shikigami"
-	DefaultProjectDescription  = "mi despliegue con fastdeploy"
-	DefaultProjectOrganization = "fastdeploy"
+	DefaultProjectDescription  = "mi despliegue con vex"
+	DefaultProjectOrganization = "vex"
 )
 
 type ProjectData struct {

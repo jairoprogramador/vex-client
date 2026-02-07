@@ -7,10 +7,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/jairoprogramador/fastdeploy-client/internal/domain/docker/services"
-	docVos "github.com/jairoprogramador/fastdeploy-client/internal/domain/docker/vos"
-	proAgg "github.com/jairoprogramador/fastdeploy-client/internal/domain/project/aggregates"
-	proVos "github.com/jairoprogramador/fastdeploy-client/internal/domain/project/vos"
+	"github.com/jairoprogramador/vex-client/internal/domain/docker/services"
+	docVos "github.com/jairoprogramador/vex-client/internal/domain/docker/vos"
+	proAgg "github.com/jairoprogramador/vex-client/internal/domain/project/aggregates"
+	proVos "github.com/jairoprogramador/vex-client/internal/domain/project/vos"
 )
 
 // mockProjectWithVolumesAndEnv es un helper para crear un proyecto con volúmenes y variables de entorno.

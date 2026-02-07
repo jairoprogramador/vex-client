@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 
-	proAgg "github.com/jairoprogramador/fastdeploy-client/internal/domain/project/aggregates"
-	proPor "github.com/jairoprogramador/fastdeploy-client/internal/domain/project/ports"
-	proVos "github.com/jairoprogramador/fastdeploy-client/internal/domain/project/vos"
+	proAgg "github.com/jairoprogramador/vex-client/internal/domain/project/aggregates"
+	proPor "github.com/jairoprogramador/vex-client/internal/domain/project/ports"
+	proVos "github.com/jairoprogramador/vex-client/internal/domain/project/vos"
 )
 
-const MessageProjectAlreadyExists = "project already initialized, fdconfig.yaml exists"
+const MessageProjectAlreadyExists = "project already initialized, vexconfig.yaml exists"
 
 type InitializeService struct {
 	projectRepository proPor.ProjectRepository

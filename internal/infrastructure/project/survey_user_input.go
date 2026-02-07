@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/jairoprogramador/fastdeploy-client/internal/domain/project/ports"
+	"github.com/jairoprogramador/vex-client/internal/domain/project/ports"
 )
 
 type surveyUserInputService struct{}

@@ -1,8 +1,8 @@
 package ports
 
 import (
-	"github.com/jairoprogramador/fastdeploy-client/internal/domain/logger/aggregates"
-	"github.com/jairoprogramador/fastdeploy-client/internal/domain/logger/entities"
+	"github.com/jairoprogramador/vex-client/internal/domain/logger/aggregates"
+	"github.com/jairoprogramador/vex-client/internal/domain/logger/entities"
 )
 
 type Logger interface {

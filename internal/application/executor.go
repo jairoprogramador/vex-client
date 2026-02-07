@@ -5,13 +5,13 @@ import (
 	"errors"
 	"fmt"
 
-	docPor "github.com/jairoprogramador/fastdeploy-client/internal/domain/docker/ports"
-	docVos "github.com/jairoprogramador/fastdeploy-client/internal/domain/docker/vos"
-	proPor "github.com/jairoprogramador/fastdeploy-client/internal/domain/project/ports"
-	proVos "github.com/jairoprogramador/fastdeploy-client/internal/domain/project/vos"
+	docPor "github.com/jairoprogramador/vex-client/internal/domain/docker/ports"
+	docVos "github.com/jairoprogramador/vex-client/internal/domain/docker/vos"
+	proPor "github.com/jairoprogramador/vex-client/internal/domain/project/ports"
+	proVos "github.com/jairoprogramador/vex-client/internal/domain/project/vos"
 )
 
-const MessageProjectNotInitialized = "project not initialized. Please run 'fd init' first"
+const MessageProjectNotInitialized = "project not initialized. Please run 'vex init' first"
 
 type ExecutorService struct {
 	projectRepository proPor.ProjectRepository
@@ -80,9 +80,9 @@ func (s *ExecutorService) Run(ctx context.Context, command, environment string) 
 		fmt.Println("Image to use no Dockerfile: ", imageToUse.FullName())
 	}
 
-	commandfastdeploy := fmt.Sprintf("%s %s", command, environment)
+	commandVex := fmt.Sprintf("%s %s", command, environment)
 
-	containerOptions, err := s.containerService.CreateOptions(project, commandfastdeploy, imageToUse)
+	containerOptions, err := s.containerService.CreateOptions(project, commandVex, imageToUse)
 	if err != nil {
 		return err
 	}

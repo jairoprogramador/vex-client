@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	docPor "github.com/jairoprogramador/fastdeploy-client/internal/domain/docker/ports"
-	docVos "github.com/jairoprogramador/fastdeploy-client/internal/domain/docker/vos"
-	proAgg "github.com/jairoprogramador/fastdeploy-client/internal/domain/project/aggregates"
+	docPor "github.com/jairoprogramador/vex-client/internal/domain/docker/ports"
+	docVos "github.com/jairoprogramador/vex-client/internal/domain/docker/vos"
+	proAgg "github.com/jairoprogramador/vex-client/internal/domain/project/aggregates"
 )
 
 // imageBuilder es la implementación del servicio de dominio.
@@ -18,7 +18,7 @@ func NewContainerBuilder() docPor.ContainerService {
 }
 
 // CreateImageOptions encapsula la lógica de negocio para determinar cómo se debe construir una imagen.
-func (s *containerBuilder) CreateOptions(project *proAgg.Project, commandfastdeploy string, image docVos.ImageName) (docVos.RunOptions, error) {
+func (s *containerBuilder) CreateOptions(project *proAgg.Project, commandVex string, image docVos.ImageName) (docVos.RunOptions, error) {
 	volumes := make(map[string]string)
 	for _, volume := range project.Runtime().Volumes() {
 		volumes[volume.Host()] = volume.Container()
@@ -31,7 +31,7 @@ func (s *containerBuilder) CreateOptions(project *proAgg.Project, commandfastdep
 
 	return docVos.NewRunOptions(
 		image, volumes, envVars,
-		commandfastdeploy, true)
+		commandVex, true)
 }
 
 // BuildCommand devuelve el comando de build para la imagen.

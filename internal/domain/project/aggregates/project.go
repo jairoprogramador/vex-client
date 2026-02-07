@@ -3,7 +3,7 @@ package aggregates
 import (
 	"errors"
 
-	"github.com/jairoprogramador/fastdeploy-client/internal/domain/project/vos"
+	"github.com/jairoprogramador/vex-client/internal/domain/project/vos"
 )
 
 type Project struct {
@@ -18,7 +18,7 @@ func NewProject(
 	data vos.ProjectData,
 	template vos.Template,
 	runtime vos.Runtime,
-	) (*Project, error) {
+) (*Project, error) {
 	if template.URL() == "" {
 		return nil, errors.New("template is required")
 	}

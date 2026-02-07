@@ -1,14 +1,14 @@
 <div align="center">
-  <h1>FastDeploy CLI (fdc)</h1>
+  <h1>Vex Client</h1>
   <p><strong>Tu asistente personal para desplegar aplicaciones sin complicaciones.</strong></p>
   <p><i>Orquesta despliegues complejos con comandos sencillos.</i></p>
   
   <p>
-    <a href="https://github.com/jairoprogramador/fastdeploy-client/releases">
-      <img src="https://img.shields.io/github/v/release/jairoprogramador/fastdeploy-client?style=for-the-badge" alt="Latest Release">
+    <a href="https://github.com/jairoprogramador/vex-client/releases">
+      <img src="https://img.shields.io/github/v/release/jairoprogramador/vex-client?style=for-the-badge" alt="Latest Release">
     </a>
-    <a href="https://github.com/jairoprogramador/fastdeploy-client/blob/main/LICENSE">
-      <img src="https://img.shields.io/github/license/jairoprogramador/fastdeploy-client?style=for-the-badge" alt="License">
+    <a href="https://github.com/jairoprogramador/vex-client/blob/main/LICENSE">
+      <img src="https://img.shields.io/github/license/jairoprogramador/vex-client?style=for-the-badge" alt="License">
     </a>
   </p>
 </div>
@@ -34,29 +34,29 @@ Instala `fdc` en segundos.
 
 ### macOS (Homebrew)
 ```sh
-# brew tap jairoprogramador/fastdeploy-client
-# brew install fastdeploy-cliente
+# brew tap jairoprogramador/vex-client
+# brew install vex-cliente
 ```
 
 ### Linux
-Puedes descargar el paquete `.deb` o `.rpm` desde la [página de Releases](https://github.com/jairoprogramador/fastdeploy-client/releases) y usar tu gestor de paquetes.
+Puedes descargar el paquete `.deb` o `.rpm` desde la [página de Releases](https://github.com/jairoprogramador/vex-client/releases) y usar tu gestor de paquetes.
 
 ```sh
 # Para sistemas basados en Debian/Ubuntu
-sudo dpkg -i fastdeploy-client_*.deb
+sudo dpkg -i vex-client_*.deb
 
 # Para sistemas basados en Red Hat/Fedora
-sudo rpm -i fastdeploy-client_*.rpm
+sudo rpm -i vex-client_*.rpm
 ```
 Alternativamente, puedes descargar el binario directamente:
 ```sh
-curl -sL https://github.com/jairoprogramador/fastdeploy-client/releases/latest/download/fastdeploy-client_linux_amd64.tar.gz | tar xz
+curl -sL https://github.com/jairoprogramador/vex-client/releases/latest/download/vex-client_linux_amd64.tar.gz | tar xz
 
 sudo mv fdc /usr/local/bin/
 ```
 
 ### Windows
-1.  Descarga el archivo `fastdeploy-client_*_windows_a*64.zip` desde la [página de Releases](https://github.com/jairoprogramador/fastdeploy-client/releases).
+1.  Descarga el archivo `vex-client_*_windows_a*64.zip` desde la [página de Releases](https://github.com/jairoprogramador/vex-client/releases).
 2.  Descomprime el archivo.
 3.  Añade el ejecutable `fdc.exe` a tu variable de entorno `PATH`.
 
@@ -70,11 +70,11 @@ Navega al directorio raíz de tu proyecto y ejecuta:
 ```sh
 fdc init
 ```
-La herramienta te guiará con unas sencillas preguntas para generar el archivo `fdconfig.yaml`, que conecta tu proyecto con la plantilla de despliegue de `fastdeploy`.
+La herramienta te guiará con unas sencillas preguntas para generar el archivo `vexconfig.yaml`, que conecta tu proyecto con la plantilla de despliegue de `vex`.
 
 ### Paso 2: Ejecuta los Pasos de Despliegue
 
-Una vez configurado, usa el comando `fdc` para enviar instrucciones directamente a `fastdeploy`. Los `steps` como `test`, `supply`, `package`  o `deploy` son gestionados por el motor de `fastdeploy`, no por esta CLI.
+Una vez configurado, usa el comando `fdc` para enviar instrucciones directamente a `vex`. Los `steps` como `test`, `supply`, `package`  o `deploy` son gestionados por el motor de `vex`, no por esta CLI.
 
 Por ejemplo, para ejecutar las pruebas en el entorno de `sand`:
 ```sh
@@ -91,7 +91,7 @@ fdc deploy sand
 | Comando | Descripción |
 | :--- | :--- |
 | `fdc init` | Inicializa un proyecto creando el archivo de configuración `fdconfig.yaml`. |
-| `fdc [step] [env]` | Ejecuta un comando en `fastdeploy`. Los `steps` (`test`, `supply`, `deploy`, etc.) dependen de la plantilla utilizada. |
+| `fdc [step] [env]` | Ejecuta un comando en `vex`. Los `steps` (`test`, `supply`, `deploy`, etc.) dependen de la plantilla utilizada. |
 | `fdc version` | Muestra la versión de la CLI. |
 
 **Flags comunes:**
@@ -99,8 +99,8 @@ fdc deploy sand
 
 ## 🤝 Contribuciones
 
-¡Las contribuciones son bienvenidas! Si tienes ideas, sugerencias o encuentras un error, por favor abre un [issue](https://github.com/jairoprogramador/fastdeploy-client/issues) o envía un [pull request](https://github.com/jairoprogramador/fastdeploy-client/pulls).
+¡Las contribuciones son bienvenidas! Si tienes ideas, sugerencias o encuentras un error, por favor abre un [issue](https://github.com/jairoprogramador/vex-client/issues) o envía un [pull request](https://github.com/jairoprogramador/vex-client/pulls).
 
 ## 📄 Licencia
 
-`fdc` está distribuido bajo la [Apache License 2.0](https://github.com/jairoprogramador/fastdeploy-client/blob/main/LICENSE).
+`fdc` está distribuido bajo la [Apache License 2.0](https://github.com/jairoprogramador/vex-client/blob/main/LICENSE).

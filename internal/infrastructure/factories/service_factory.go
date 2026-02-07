@@ -4,11 +4,11 @@ import (
 	"os"
 	"path/filepath"
 
-	app "github.com/jairoprogramador/fastdeploy-client/internal/application"
-	dockerDomain "github.com/jairoprogramador/fastdeploy-client/internal/domain/docker/services"
-	"github.com/jairoprogramador/fastdeploy-client/internal/domain/project/ports"
-	"github.com/jairoprogramador/fastdeploy-client/internal/infrastructure/docker"
-	"github.com/jairoprogramador/fastdeploy-client/internal/infrastructure/project"
+	app "github.com/jairoprogramador/vex-client/internal/application"
+	dockerDomain "github.com/jairoprogramador/vex-client/internal/domain/docker/services"
+	"github.com/jairoprogramador/vex-client/internal/domain/project/ports"
+	"github.com/jairoprogramador/vex-client/internal/infrastructure/docker"
+	"github.com/jairoprogramador/vex-client/internal/infrastructure/project"
 )
 
 type ServiceFactory interface {
