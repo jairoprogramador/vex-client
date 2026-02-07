@@ -1,5 +1,5 @@
 version: 2
-project_name: vex-client
+project_name: vex
 
 release:
   mode: replace
@@ -38,7 +38,7 @@ archives:
 
 nfpms:
   - id: vex
-    package_name: vex-client
+    package_name: vex
     file_name_template: '{{ .PackageName }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}'
     ids: [vex]
     maintainer: "Jairo <jairo.jggc@gmail.com>"
@@ -51,7 +51,7 @@ nfpms:
       - apk
 
 homebrew_casks:
-  - name: vex-client
+  - name: vex
     ids:
       - archive
     repository:
@@ -63,7 +63,7 @@ homebrew_casks:
       email: jairo.jggc@gmail.com
     homepage: "https://github.com/jairoprogramador/vex-client"
     description: "CLI multiplataforma para despliegues automáticos y rápidos de aplicaciones"
-    binary: vex
+    binaries: [vex]
 
 changelog:
   use: git
