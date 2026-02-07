@@ -121,12 +121,9 @@ $RECYCLE.BIN/
 *.lnk
 
 # Cursor
-.cursor/
-.cursorrules
+.cursor/**
 
 # Custom
-fdc
-vex
 .junie/
 
 # Go workspace file
