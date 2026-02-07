@@ -56,6 +56,7 @@ var rootCmd = &cobra.Command{
 
 func Execute(versionMain string) {
 	version = versionMain
+	rootCmd.Version = fmt.Sprintf("v%s\n", version)
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
@@ -65,7 +66,6 @@ func Execute(versionMain string) {
 func init() {
 	rootCmd.PersistentFlags().BoolVar(&withTtyFlag, "with-tty", false, "Enable pseudo-TTY allocation.")
 	rootCmd.PersistentFlags().StringVar(&colorFlag, "color", "always", "control color output (auto, always, never)")
-	rootCmd.Version = fmt.Sprintf("v%s\n", version)
 	rootCmd.SetVersionTemplate(`{{.Version}}`)
 
 	rootCmd.AddCommand(initCmd)
