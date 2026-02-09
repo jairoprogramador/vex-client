@@ -36,7 +36,7 @@ Instala `vex` en segundos.
 ```sh
 brew install --cask jairoprogramador/vex-client/vex
 ```
-Si macOS indica que no puede verificar el desarrollador, puedes permitir la ejecución en **Ajustes del sistema → Privacidad y seguridad → "Abrir de todos modos"**, o en Terminal: `xattr -cr $(which vexc)`.
+Si macOS indica que no puede verificar el desarrollador, puedes permitir la ejecución en **Ajustes del sistema → Privacidad y seguridad → "Abrir de todos modos"**, o en Terminal: `xattr -cr $(which vex)`.
 
 ### Linux
 Puedes descargar el paquete `.deb` o `.rpm` desde la [página de Releases](https://github.com/jairoprogramador/vex-client/releases) y usar tu gestor de paquetes.

@@ -36,7 +36,7 @@ func TestImageBuilderService_CreateOptions(t *testing.T) {
 	builder := services.NewImageBuilder()
 
 	t.Run("should create options with linux specific args", func(t *testing.T) {
-		if runtime.GOOS != "linux" {
+		if runtime.GOOS != "linux" && runtime.GOOS != "darwin" {
 			t.Skip("Skipping linux specific test on non-linux OS")
 		}
 
@@ -55,7 +55,7 @@ func TestImageBuilderService_CreateOptions(t *testing.T) {
 	})
 
 	t.Run("should create options without linux specific args on other OS", func(t *testing.T) {
-		if runtime.GOOS == "linux" {
+		if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
 			t.Skip("Skipping non-linux specific test on linux OS")
 		}
 
@@ -105,7 +105,7 @@ func TestImageBuilderService_BuildCommand(t *testing.T) {
 		assert.Contains(t, command, "-t "+opts.Image().FullName())
 		assert.Contains(t, command, "--build-arg vex-client_VERSION=1.0.0")
 		assert.Contains(t, command, " .")
-		if runtime.GOOS == "linux" {
+		if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
 			assert.Contains(t, command, "--build-arg DEV_GID=$(id -g)")
 		}
 	})
