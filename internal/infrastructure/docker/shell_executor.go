@@ -22,7 +22,7 @@ func NewShellExecutor() ports.CommandExecutor {
 
 func (s *ShellExecutor) Execute(ctx context.Context, command string) (string, error) {
 	var cmd *exec.Cmd
-	if runtime.GOOS == "linux" {
+	if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
 		cmd = exec.CommandContext(ctx, "sh", "-c", command)
 	} else {
 		cmd = exec.CommandContext(ctx, "cmd", "/C", command)

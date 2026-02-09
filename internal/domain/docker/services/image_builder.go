@@ -28,7 +28,7 @@ func (s *imageBuilder) CreateOptions(project *proAgg.Project) (docVos.BuildOptio
 
 	imgArgs := make(map[string]string)
 
-	if runtime.GOOS == "linux" {
+	if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
 		imgArgs["DEV_GID"] = "$(id -g)"
 		imgArgs["DEV_UID"] = "$(id -u)"
 	}
